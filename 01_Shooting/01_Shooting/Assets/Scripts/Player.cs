@@ -7,7 +7,7 @@ public class Player : MonoBehaviour
     public float moveSpeed = 0.5f;
     public GameObject explosion;
     public GameObject rocket;
-    public bool canShoot = true;
+    public bool canShoot = false;
     float shootDelay = 0.5f;
     float shootTimer = 0;
 
@@ -20,6 +20,15 @@ public class Player : MonoBehaviour
     {
         float moveX = moveSpeed * Time.deltaTime * Input.GetAxis("Horizontal");
         transform.Translate(moveX, 0, 0);
+
+        // 현재 플레이어의 월드좌표를 뷰포트 기준 좌표로 변환시키는 명령
+        Vector3 viewPos = Camera.main.WorldToViewportPoint(transform.position);
+
+        // Mathf.Clamp01(값) - 입력된 값이 0~1 사이를 벗어나지 못하게 강제로 조정해주는 함수
+        viewPos.x = Mathf.Clamp01(viewPos.x);
+
+        Vector3 worldPos = Camera.main.ViewportToWorldPoint(viewPos);
+        transform.position = worldPos;
     }
 
     private void OnTriggerEnter2D(Collider2D collision) // 충돌체 정보인자를 받는 함수 추가

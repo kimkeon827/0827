@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public int destroyScore = 100;
+
     public float moveSpeed = 0.5f;
 
     public GameObject explosion;
@@ -16,6 +18,8 @@ public class Enemy : MonoBehaviour
             Instantiate(explosion, transform.position, Quaternion.identity);
 
             SoundManager.instance.PlaySound();
+
+            GameManager.instance.AddScore(destroyScore);
 
             // Rocket Á¦°Å
             Destroy(collision.gameObject);
