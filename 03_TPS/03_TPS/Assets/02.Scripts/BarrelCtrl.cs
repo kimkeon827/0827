@@ -13,6 +13,9 @@ public class BarrelCtrl : MonoBehaviour
     // 하위에 있는 Mesh Renderer 컴포넌트를 저장할 변수
     private new MeshRenderer renderer;
 
+    // 결괏값을 저장할 정적 배열을 미리 선언
+    Collider[] colls = new Collider[10];
+
     // 컴포넌트를 저장할 변수
     private Transform tr;
     private Rigidbody rb;
@@ -68,8 +71,11 @@ public class BarrelCtrl : MonoBehaviour
 
     // 폭발력을 주변에 전달하는 함수
     void IndirectDamage(Vector3 pos){
-        // 주변에 있는 드럼통을 모두 추출
-        Collider[] colls = Physics.OverlapSphere(pos, radius, 1 << 3);
+        // 가비지 컬렉션이 발생
+        // Collider[] colls = Physics.OverlapSphere(pos, radius, 1 << 3);
+
+        // 가비지 컬렉션이 발생하지 않음
+        Physics.OverlapSphereNonAlloc(pos, radius, colls, 1<<3);
 
         foreach(var coll in colls){
             // 폭발 범위에 포함된 드럼통의 Rigidbody 컴포넌트 추출
