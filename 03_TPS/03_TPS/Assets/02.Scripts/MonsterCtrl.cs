@@ -32,6 +32,10 @@ public class MonsterCtrl : MonoBehaviour
     // Animator 파라미터의 해시값 추출
     private readonly int hashTrace = Animator.StringToHash("IsTrace");
     private readonly int hashAttack = Animator.StringToHash("IsAttack");
+    private readonly int hashHit = Animator.StringToHash("Hit");
+
+    // 혈흔 효과 프리팹
+    private GameObject bloodEffect;
 
     void Start (){
         // 몬스터의 Transform 할당
@@ -45,6 +49,9 @@ public class MonsterCtrl : MonoBehaviour
 
         // Animator 컴포넌트 할당
         anim = GetComponent<Animator>();        
+
+        // BloodSprayEffect 프리팹 로드
+        bloodEffect = Resources.Load<GameObject>("BloodSprayEffect");
 
         // 몬스터의 상태를 체크하는 코루틴 함수 호출
         StartCoroutine(CheckMonsterState());
@@ -83,6 +90,7 @@ public class MonsterCtrl : MonoBehaviour
                 case State.IDLE:
                     // 추적 중지
                     agent.isStopped = true;
+
                     // Animator의 IsTrace 변수를 false로 설정
                     anim.SetBool(hashTrace, false);
                     break;
@@ -112,6 +120,28 @@ public class MonsterCtrl : MonoBehaviour
             }
             yield return new WaitForSeconds(0.3f);
         }
+    }
+
+    void OnCollisionEnter(Collision coll){
+        if (coll.collider.CompareTag("BULLET")){
+            // 충돌된 총알을 삭제
+            Destroy(coll.gameObject);
+            // 피격 리액션 애니메이션 실행
+            anim.SetTrigger(hashHit);
+
+            // 총알의 충돌 지점
+            Vector3 pos = coll.GetContact(0).point;
+            // 총알의 충돌 지점의 법선 벡터
+            Quaternion rot = Quaternion.LookRotation(-coll.GetContact(0).normal);
+            // 혈흔 효과를 생성하는 함수 호출
+            ShowBloodEffect(pos, rot);
+        }
+    }
+
+    void ShowBloodEffect(Vector3 pos, Quaternion rot){
+        // 혈흔 효과 생성
+        GameObject blood = Instantiate<GameObject>(bloodEffect, pos, rot, monsterTr);
+        Destroy(blood, 1.0f);
     }
 
     void OnDrawGizmos(){
