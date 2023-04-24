@@ -168,8 +168,10 @@ public class MonsterCtrl : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter(Collision coll){
-        if (coll.collider.CompareTag("BULLET")){
+    void OnCollisionEnter(Collision coll)
+    {
+        if (coll.collider.CompareTag("BULLET"))
+        {
             // 충돌된 총알을 삭제
             Destroy(coll.gameObject);
             // 피격 리액션 애니메이션 실행
@@ -184,14 +186,16 @@ public class MonsterCtrl : MonoBehaviour
 
             // 몬스터의 hp 차감
             hp -= 10;
-            if (hp <= 0){
+            if (hp <= 0)
+            {
                 state = State.DIE;
             }
         }
     }
 
     // 혈흔 효과를 생성하는 함수
-    void ShowBloodEffect(Vector3 pos, Quaternion rot){
+    void ShowBloodEffect(Vector3 pos, Quaternion rot)
+    {
         // 혈흔 효과 생성
         GameObject blood = Instantiate<GameObject>(bloodEffect, pos, rot, monsterTr);
         Destroy(blood, 1.0f);

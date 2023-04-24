@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+// TextMesh Pro 관련 컴포넌트에 접근하기 위해 선언
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -36,6 +38,11 @@ public class GameManager : MonoBehaviour
     // 싱글턴 인스턴스 선언
     public static GameManager instance = null;
 
+    // 스코어 텍스트를 연결할 변수
+    public TMP_Text scoreText;
+    // 누적 점수를 기록하기위한 변수
+    private int totScore = 0;
+
     // 스크립트가 실행되면 가장 먼저 호출되는 유니티 이벤트 함수
     void Awake(){
         // instance가 할당되지 않았을 경우
@@ -65,19 +72,25 @@ public class GameManager : MonoBehaviour
 
         // 일정한 시간 간격으로 함수를 호출
         InvokeRepeating("CreateMonster", 2.0f, createTime);
+
+        // 스코어 점수 출력
+        DisplayScore(0);
     }
 
     void CreateMonster(){
         // 몬스터의 불규칙한 생성 위치 산출
         int idx = Random.Range(0, points.Count);
+
         // 몬스터 프리팹 생성
         //Instantiate(monster, points[idx].position, points[idx].rotation);
 
         // 오브젝트 풀에서 몬스터 추출
         GameObject _monster = GetMonsterInPool();
+
         // 추출한 몬스터의 위치와 회전을 설정
         _monster?.transform.SetPositionAndRotation(points[idx].position, 
                                                    points[idx].rotation);
+
         // 추출한 몬스터를 활성화
         _monster?.SetActive(true);                                                   
     }
@@ -109,5 +122,11 @@ public class GameManager : MonoBehaviour
         }
 
         return null;
+    }
+
+    // 점수를 누적하고 출력하는 함수
+    public void DisplayScore(int score){
+        totScore += score;
+        scoreText.text = $"<color=#00ff00>SCORE :</color> <color=#ff0000>{totScore:#,##0}</color>";
     }
 }
