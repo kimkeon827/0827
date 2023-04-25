@@ -45,7 +45,7 @@ public class FollowCam : MonoBehaviour
         camTr.position = Vector3.SmoothDamp(camTr.position, // 시작 위치
                                             pos,            // 목표 위치
                                             ref velocity,   // 현재 속도
-                                            damping);       // 목표 위치까지 도달할 시간
+                                            damping);       // 목표 위치까지 도달할 시간        
 
         // Camera를 피벗 좌표를 향해 회전
         camTr.LookAt(targetTr.position + (targetTr.up * targetOffset));

@@ -58,7 +58,8 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(this.gameObject);
     }
 
-    void Start(){
+    void Start()
+    {
         // 몬스터 오브젝트 풀 생성
         CreateMonsterPool();
 
@@ -66,7 +67,8 @@ public class GameManager : MonoBehaviour
         Transform spawnPointGroup = GameObject.Find("SpawnPointGroup")?.transform;
 
         // SpawnPointGroup 하위에 있는 모든 차일드 게임오브젝트의 Transform 컴포넌트 추출
-        foreach(Transform point in spawnPointGroup){
+        foreach(Transform point in spawnPointGroup)
+        {
             points.Add(point);
         }
 
@@ -74,6 +76,7 @@ public class GameManager : MonoBehaviour
         InvokeRepeating("CreateMonster", 2.0f, createTime);
 
         // 스코어 점수 출력
+        totScore = PlayerPrefs.GetInt("TOT_SCORE", 0);
         DisplayScore(0);
     }
 
@@ -125,8 +128,11 @@ public class GameManager : MonoBehaviour
     }
 
     // 점수를 누적하고 출력하는 함수
-    public void DisplayScore(int score){
+    public void DisplayScore(int score)
+    {
         totScore += score;
         scoreText.text = $"<color=#00ff00>SCORE :</color> <color=#ff0000>{totScore:#,##0}</color>";
+        // 스코어 저장
+        PlayerPrefs.SetInt("TOT_SCORE", totScore);
     }
 }

@@ -18,6 +18,9 @@ public class FireCtrl : MonoBehaviour
     // Muzzle Flash의 MeshRenderer 컴포넌트
     private MeshRenderer muzzleFlash;
 
+    // Raycast 결괏값을 저장하기 위한 구조체 선언
+    private RaycastHit hit;
+
     void Start (){
         audio = GetComponent<AudioSource>();
 
@@ -29,10 +32,24 @@ public class FireCtrl : MonoBehaviour
 
     void Update()
     {
+        // Ray를 시각적으로 표시하기 위해 사용
+        Debug.DrawRay(firePos.position, firePos.forward * 10.0f, Color.green);
+
         // 마우스 왼쪽 버튼을 클릭했을 때 Fire 함수 호출
         if (Input.GetMouseButtonDown(0))
         {
             Fire();
+
+            // Ray를 발사
+            if (Physics.Raycast(firePos.position,   // 광선의 발사 원점
+                                firePos.forward,    // 광선의 발사 방향
+                                out hit,            // 광선에 맞은 결과 데이터
+                                10.0f,              // 광선의 거리
+                                1 << 6))            // 감지하는 범위인 레이어 마스크                                
+            {
+                Debug.Log($"Hit={hit.transform.name}");
+                hit.transform.GetComponent<MonsterCtrl>()?.OnDamage(hit.point, hit.normal);
+            }
         }
     }
 
@@ -40,13 +57,15 @@ public class FireCtrl : MonoBehaviour
     {
         // Bullet 프리팹을 동적으로 생성(생성할 객체, 위치, 회전)
         Instantiate(bullet, firePos.position, firePos.rotation);
+
         // 총소리 발생
         audio.PlayOneShot(fireSfx, 1.0f);
         // 총구 화염 효과 코루틴 함수 호출
         StartCoroutine(ShowMuzzFlash());
     }
 
-    IEnumerator ShowMuzzFlash(){
+    IEnumerator ShowMuzzFlash()
+    {
         // 오프셋 좌푯값을 랜덤 함수로 생성
         Vector2 offset = new Vector2(Random.Range(0, 2), Random.Range(0, 2)) * 0.5f;
         // 텍스처의 오프셋 값 설정

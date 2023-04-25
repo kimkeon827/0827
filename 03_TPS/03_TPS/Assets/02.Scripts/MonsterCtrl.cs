@@ -44,7 +44,8 @@ public class MonsterCtrl : MonoBehaviour
     public int hp = 100;
 
     // 스크립트가 활성화될 때마다 호출되는 함수
-    void OnEnable(){
+    void OnEnable()
+    {
         // 이벤트 발생 시 수행할 함수 연결
         PlayerCtrl.OnPlayerDie += this.OnPlayerDie;
 
@@ -55,12 +56,14 @@ public class MonsterCtrl : MonoBehaviour
     }
 
     // 스크립트가 비활성화될 때마다 호출되는 함수
-    void OnDisable(){
+    void OnDisable()
+    {
         // 기존에 연결된 함수 해제
         PlayerCtrl.OnPlayerDie -= this.OnPlayerDie;
     }
 
-    void Awake (){
+    void Awake ()
+    {
         // 몬스터의 Transform 할당
         monsterTr = GetComponent<Transform>();
 
@@ -69,6 +72,8 @@ public class MonsterCtrl : MonoBehaviour
 
         // NavMeshAgent 컴포넌트 할당
         agent = GetComponent<NavMeshAgent>();
+        // NavMeshAgent의 자동 회전기능 비활성화
+        agent.updateRotation = false;
 
         // Animator 컴포넌트 할당
         anim = GetComponent<Animator>();        
@@ -79,8 +84,24 @@ public class MonsterCtrl : MonoBehaviour
         
     }
 
+    void Update(){
+        // 목적지까지 남은 거리로 회전 여부 판단
+        if (agent.remainingDistance >= 2.0f)
+        {
+            // 에이전트의 이동 방향
+            Vector3 direction = agent.desiredVelocity;
+            // 회전 각도(쿼터니언) 산출
+            Quaternion rot = Quaternion.LookRotation(direction);
+            // 구면 선형보간 함수로 부드러운 회전 처리
+            monsterTr.rotation = Quaternion.Slerp(monsterTr.rotation,
+                                                  rot,
+                                                  Time.deltaTime * 10.0f);
+        }
+    }
+
     // 일정한 간격으로 몬스터의 행동 상태를 체크
-    IEnumerator CheckMonsterState(){
+    IEnumerator CheckMonsterState()
+    {
         while(!isDie){
             // 0.3초동안 중지(대기)하는 동안 제어권을 메시지 루프에 양보
             yield return new WaitForSeconds(0.3f);
@@ -106,9 +127,12 @@ public class MonsterCtrl : MonoBehaviour
     }
 
     // 몬스터의 상태에 따라 몬스터의 동작을 수행
-    IEnumerator MonsterAction(){
-        while (!isDie){
-            switch (state){
+    IEnumerator MonsterAction()
+    {
+        while (!isDie)
+        {
+            switch (state)
+            {
                 // IDLE 상태
                 case State.IDLE:
                     // 추적 중지
@@ -173,23 +197,27 @@ public class MonsterCtrl : MonoBehaviour
         if (coll.collider.CompareTag("BULLET"))
         {
             // 충돌된 총알을 삭제
-            Destroy(coll.gameObject);
-            // 피격 리액션 애니메이션 실행
-            anim.SetTrigger(hashHit);
+            Destroy(coll.gameObject);            
+        }
+    }
 
-            // 총알의 충돌 지점
-            Vector3 pos = coll.GetContact(0).point;
-            // 총알의 충돌 지점의 법선 벡터
-            Quaternion rot = Quaternion.LookRotation(-coll.GetContact(0).normal);
-            // 혈흔 효과를 생성하는 함수 호출
-            ShowBloodEffect(pos, rot);
+    // 레이캐스트를 이용해 데미지를 입히는 로직
+    public void OnDamage(Vector3 pos, Vector3 normal)
+    {
+        // 피격 리액션 애니메이션 실행
+        anim.SetTrigger(hashHit);
+        Quaternion rot = Quaternion.LookRotation(normal);
 
-            // 몬스터의 hp 차감
-            hp -= 10;
-            if (hp <= 0)
-            {
-                state = State.DIE;
-            }
+        // 혈흔 효과를 생성하는 함수 호출
+        ShowBloodEffect(pos, rot);
+
+        // 몬스터의 hp 차감
+        hp -= 30;
+        if (hp <= 0)
+        {
+            state = State.DIE;
+            // 몬스터가 사망했을 때 50점을 추가
+            GameManager.instance.DisplayScore(50);
         }
     }
 
@@ -201,24 +229,29 @@ public class MonsterCtrl : MonoBehaviour
         Destroy(blood, 1.0f);
     }
 
-    void OnDrawGizmos(){
+    void OnDrawGizmos()
+    {
         // 추적 사정거리 표시
-        if (state == State.TRACE){
+        if (state == State.TRACE)
+        {
             Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(transform.position, traceDist);
         }
         // 공격 사정거리 표시
-        if (state == State.ATTCK){
+        if (state == State.ATTCK)
+        {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, attackDist);
         }
     }
 
-    void OnTriggerEnter(Collider coll){
+    void OnTriggerEnter(Collider coll)
+    {
         Debug.Log(coll.gameObject.name);
     }
 
-    void OnPlayerDie(){
+    void OnPlayerDie()
+    {
         // 몬스터의 상태를 체크하는 코루틴 함수를 모두 정지시킴
         StopAllCoroutines();
 
